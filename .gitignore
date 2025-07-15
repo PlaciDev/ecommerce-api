@@ -1,0 +1,50 @@
+# Compiled binaries
+bin/
+obj/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+*.nuspec
+project.lock.json
+project.fragment.lock.json
+
+# ASP.NET Core secrets
+secrets.json
+appsettings.Development.json
+appsettings.Local.json
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio folders
+.vs/
+.vscode/
+
+# Rider IDE
+.idea/
+
+# Logs
+*.log
+
+# Build results
+artifacts/
+
+# Others
+*.db
+*.db-shm
+*.db-wal
+
+# Azure Pipelines
+.vsts/
+
+# Optional: Ignore Docker artifacts
+**/docker-compose.override.yml
+**/docker-compose.*
+
+# Optional: Ignore local test results
+TestResults/
