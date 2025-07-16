@@ -9,7 +9,7 @@
         public string Role { get; set; }
         DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-
+        public Customer CustomerProfile { get; set; }
 
     }
 }
