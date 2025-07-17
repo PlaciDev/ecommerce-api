@@ -7,7 +7,7 @@
         public string Email { get; set; }
         public string PasswordHash { get; set; }
         public Role Role { get; set; }
-        DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public Customer CustomerProfile { get; set; }
 
