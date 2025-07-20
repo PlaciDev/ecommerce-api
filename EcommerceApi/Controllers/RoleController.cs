@@ -1,5 +1,6 @@
 ﻿using EcommerceApi.Data;
 using EcommerceApi.Models;
+using EcommerceApi.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,12 @@ namespace EcommerceApi.Controllers
                 var roles = await context
                     .Roles
                     .AsNoTracking()
+                    .Select(x => new RoleListViewModel
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        Description = x.Description
+                    })
                     .ToListAsync();
                 if (roles is null || !roles.Any())
                 {
@@ -56,8 +63,14 @@ namespace EcommerceApi.Controllers
         [HttpPost("api/roles")]
         public async Task<IActionResult> Post(
             [FromServices] ApiDbContext context,
-            [FromBody] Role model)
+            [FromBody] RoleEditViewModel model)
         {
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             try
             {
                 var role = new Role
@@ -111,6 +124,7 @@ namespace EcommerceApi.Controllers
             [FromServices] ApiDbContext context,
             [FromRoute] int id)
         {
+
             try
             {
                 var role = await context.Roles.FirstOrDefaultAsync(x => x.Id == id);
