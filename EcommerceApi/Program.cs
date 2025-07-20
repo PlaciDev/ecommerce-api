@@ -1,11 +1,26 @@
 using EcommerceApi.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddDbContext<ApiDbContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Configura a connectionString para o banco de dados
+
+builder.Services.AddDbContext<ApiDbContext>(option => 
+    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Ignora ciclos de referência e valores nulos ao serializar objetos JSON
+
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+});
+
+
+
 
 builder.Services.AddControllers();
 
