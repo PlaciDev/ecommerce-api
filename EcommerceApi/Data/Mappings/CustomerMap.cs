@@ -18,7 +18,8 @@ namespace EcommerceApi.Data.Mappings
             builder.Property(x => x.PhoneNumber)
                 .IsRequired()
                 .HasColumnName("PhoneNumber")
-                .HasColumnType("INTEGER");
+                .HasColumnType("VARCHAR")
+                .HasMaxLength(20);
 
             builder.HasOne(x => x.User)
                 .WithOne(x => x.CustomerProfile);
