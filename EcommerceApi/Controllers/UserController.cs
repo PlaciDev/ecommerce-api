@@ -10,6 +10,7 @@ using SecureIdentity.Password;
 namespace EcommerceApi.Controllers
 {   
     [Authorize(Roles = "Admin")]
+    [ApiController]
     public class UserController : ControllerBase
     {
         [AllowAnonymous]

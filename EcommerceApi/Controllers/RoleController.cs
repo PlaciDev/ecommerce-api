@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApi.Controllers
+
 {
+    [ApiController]
     public class RoleController : ControllerBase
     {
 
