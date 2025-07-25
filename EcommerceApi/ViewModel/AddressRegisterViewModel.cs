@@ -2,7 +2,7 @@
 
 namespace EcommerceApi.ViewModel
 {
-    public class AddressEditViewModel
+    public class AddressRegisterViewModel
     {
         [Required(ErrorMessage = "A rua é obrigatória")]
         public string Street { get; set; }
@@ -17,6 +17,5 @@ namespace EcommerceApi.ViewModel
 
         [Required(ErrorMessage = "O CEP é obrigatório")]
         public string ZipCode { get; set; }
- 
     }
 }
