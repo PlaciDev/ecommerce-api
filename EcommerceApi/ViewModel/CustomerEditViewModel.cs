@@ -1,16 +1,15 @@
-﻿using EcommerceApi.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace EcommerceApi.ViewModel
 {
-    public class CustomerRegisteViewModel
+    public class CustomerEditViewModel
     {
-        public UserRegisterViewModel User { get; set; }
+        public UserEditViewModel User { get; set; }
 
         [Required(ErrorMessage = "O telefone é obrigatório.")]
         [Phone(ErrorMessage = "O número de telefone informado é inválido.")]
         public string PhoneNumber { get; set; }
 
-        public AddressRegisterViewModel Address { get; set; }
+        public AddressEditViewModel Address { get; set; }
     }
 }
