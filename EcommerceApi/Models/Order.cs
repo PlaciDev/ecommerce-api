@@ -8,7 +8,6 @@
 
         public OrderStatus Status { get; set; }
 
-        public int CustomerId { get; set; }
         public Customer Customer { get; set; }
         public Payment Payment { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
