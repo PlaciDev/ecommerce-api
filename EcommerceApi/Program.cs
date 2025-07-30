@@ -4,6 +4,7 @@ using EcommerceApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -44,6 +45,11 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
 
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+
 builder.Services.AddTransient<TokenService>();
 
 
@@ -67,6 +73,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+app.UseAuthentication();
 
 app.MapControllers();
 
