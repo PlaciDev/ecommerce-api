@@ -45,7 +45,9 @@ namespace EcommerceApi.Data.Mappings
 
             builder.HasOne(x => x.CustomerProfile)
                 .WithOne(x => x.User)
+                .HasForeignKey<Customer>(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+                
 
 
 

@@ -41,7 +41,6 @@ namespace EcommerceApi.Data.Mappings
 
             builder.HasOne(x => x.Order)
                 .WithOne(x => x.Payment)
-                .HasForeignKey<Payment>(x => x.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
 
