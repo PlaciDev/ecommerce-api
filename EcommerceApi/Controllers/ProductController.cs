@@ -3,6 +3,7 @@ using EcommerceApi.Models;
 using EcommerceApi.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace EcommerceApi.Controllers
 {
@@ -11,15 +12,23 @@ namespace EcommerceApi.Controllers
     {
         [HttpGet("api/products")]
         public async Task<IActionResult> Get(
-            [FromServices] ApiDbContext context)
+            [FromServices] ApiDbContext context,
+            [FromServices] IMemoryCache cache,
+            [FromQuery] int page,
+            [FromQuery] int pageSize)
         {
             try
             {
-                var products = await context
+                var products = await cache.GetOrCreateAsync("products", async entry =>
+
+                {
+                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+                    return await context
                     .Products
                     .AsNoTracking()
                     .Select(x => new ProductListViewModel
-                    
+
                     {
                         Id = x.Id,
                         Name = x.Name,
@@ -33,7 +42,17 @@ namespace EcommerceApi.Controllers
                             Description = x.Category.Description
                         }
                     })
+                    .Skip(page * pageSize)
+                    .Take(pageSize)
                     .ToListAsync();
+
+
+                });
+
+
+
+
+                    
                 if (products is null || !products.Any())
                 {
                     return NotFound("Nenhum produto encontrado...");
@@ -49,28 +68,39 @@ namespace EcommerceApi.Controllers
         [HttpGet("api/products/{id:int}")]
         public async Task<IActionResult> GetById(
             [FromServices] ApiDbContext context,
-            [FromRoute] int id)
+            [FromRoute] int id,
+            [FromServices] IMemoryCache cache)
         {
             try
             {
-                var product = await context
-                    .Products
-                    .AsNoTracking()
-                    .Select(x => new ProductListViewModel
-                    {
-                        Id = x.Id,
-                        Name = x.Name,
-                        Description = x.Description,
-                        Price = x.Price,
-                        Stock = x.Stock,
-                        Category = new CategoryListViewModel
-                        {
-                            Id = x.Category.Id,
-                            Name = x.Category.Name,
-                            Description = x.Category.Description
-                        }
-                    })
-                    .FirstOrDefaultAsync(x => x.Id == id);
+                var product = await cache.GetOrCreateAsync($"product_{id}", async entry =>
+
+                {
+
+                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+                    return await context
+                   .Products
+                   .AsNoTracking()
+                   .Select(x => new ProductListViewModel
+                   {
+                       Id = x.Id,
+                       Name = x.Name,
+                       Description = x.Description,
+                       Price = x.Price,
+                       Stock = x.Stock,
+                       Category = new CategoryListViewModel
+                       {
+                           Id = x.Category.Id,
+                           Name = x.Category.Name,
+                           Description = x.Category.Description
+                       }
+                   })
+                   .FirstOrDefaultAsync(x => x.Id == id);
+
+                });
+
+                   
                 if (product is null)
                 {
                     return NotFound("Produto não encontrado...");
@@ -117,7 +147,22 @@ namespace EcommerceApi.Controllers
                 context.Products.Add(product);
                 await context.SaveChangesAsync();
 
-                return Created($"api/products/{product.Id}", product);
+                var productViewModel = new ProductListViewModel
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Description = product.Description,
+                    Price = product.Price,
+                    Stock = product.Stock,
+                    Category = new CategoryListViewModel
+                    {
+                        Id = category.Id,
+                        Name = category.Name,
+                        Description = category.Description
+                    }
+                };
+
+                return Created($"api/products/{product.Id}", productViewModel);
             }
             catch (Exception)
             {
