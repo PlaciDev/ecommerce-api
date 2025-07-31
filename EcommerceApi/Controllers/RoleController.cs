@@ -84,7 +84,14 @@ namespace EcommerceApi.Controllers
                 await context.Roles.AddAsync(role);
                 await context.SaveChangesAsync();
 
-                return Created($"api/roles/{role.Id}", role);
+                var roleViewModel = new RoleListViewModel
+                {
+                    Id = role.Id,
+                    Name = role.Name,
+                    Description = role.Description
+                };
+
+                return Created($"api/roles/{role.Id}", roleViewModel);
             }
             catch
             {
