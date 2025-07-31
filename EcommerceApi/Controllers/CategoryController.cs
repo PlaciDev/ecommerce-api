@@ -3,6 +3,7 @@ using EcommerceApi.Models;
 using EcommerceApi.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace EcommerceApi.Controllers
 {
@@ -12,20 +13,34 @@ namespace EcommerceApi.Controllers
 
         [HttpGet("api/categories")]
         public async Task<IActionResult> Get(
-            [FromServices] ApiDbContext context)
+            [FromServices] ApiDbContext context,
+            [FromServices] IMemoryCache cache,
+            [FromQuery] int page,
+            [FromQuery] int pageSize)
         {
             try
             {
-                var categories = await context
-                    .Categories
-                    .AsNoTracking()
-                    .Select(x => new CategoryListViewModel
-                    {
-                        Id = x.Id,
-                        Name = x.Name,
-                        Description = x.Description
-                    })
-                    .ToListAsync();
+                var categories = await cache.GetOrCreateAsync("categories", async entry =>
+                {
+                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+
+                    return await context
+                        .Categories
+                        .AsNoTracking()
+                        .Select(x => new CategoryListViewModel
+                        {
+                            Id = x.Id,
+                            Name = x.Name,
+                            Description = x.Description
+                        })
+                        .Skip(page * pageSize)
+                        .Take(pageSize)
+                        .OrderBy(x => x.Name)
+                        .ToListAsync();
+
+                });
+                
 
                 if (categories is null || !categories.Any())
                 {
@@ -43,28 +58,42 @@ namespace EcommerceApi.Controllers
 
         [HttpGet("api/categories/with-products")]
         public async Task<IActionResult> GetWithProducts(
-            [FromServices] ApiDbContext context)
+            [FromServices] ApiDbContext context,
+            [FromServices] IMemoryCache cache,
+            [FromQuery] int size,
+            [FromQuery] int pageSize)
         {
             try
             {
-                var categories = await context
-                    .Categories
-                    .AsNoTracking()
-                    .Include(x => x.Products)
-                    .Select(x => new CategoryListViewModel
-                    {
-                        Id = x.Id,
-                        Name = x.Name,
-                        Description = x.Description,
-                        Products = x.Products.Select(x => new ProductListViewModel
-                        {
-                            Id = x.Id,
-                            Name = x.Name,
-                            Price = x.Price,
-                            Description = x.Description
-                        }).ToList()
-                    })
-                    .ToListAsync();
+                var categories = await cache.GetOrCreateAsync("categories_with_products", async entry =>
+                {
+
+                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+                    return await context
+                   .Categories
+                   .AsNoTracking()
+                   .Include(x => x.Products)
+                   .Select(x => new CategoryListViewModel
+                   {
+                       Id = x.Id,
+                       Name = x.Name,
+                       Description = x.Description,
+                       Products = x.Products.Select(x => new ProductListViewModel
+                       {
+                           Id = x.Id,
+                           Name = x.Name,
+                           Price = x.Price,
+                           Description = x.Description
+                       }).ToList()
+                   })
+                   .Skip(size * pageSize)
+                   .Take(pageSize)
+                   .OrderBy(x => x.Name)
+                   .ToListAsync();
+
+                });
+                   
                 if (categories is null || !categories.Any())
                 {
                     return NotFound("Nenhuma categoria encontrada...");
@@ -80,11 +109,18 @@ namespace EcommerceApi.Controllers
         [HttpGet("api/categories/{id:int}")]
         public async Task<IActionResult> GetById(
             [FromServices] ApiDbContext context,
+            [FromServices] IMemoryCache cache,
             [FromRoute] int id)
         {
             try
             {
-                var category = await context
+                var category = cache.GetOrCreateAsync<CategoryListViewModel>($"category_{id}", async entry =>
+
+                {
+                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+
+                    return await context
                     .Categories
                     .AsNoTracking()
                     .Select(x => new CategoryListViewModel
@@ -101,6 +137,9 @@ namespace EcommerceApi.Controllers
                         }).ToList()
                     })
                     .FirstOrDefaultAsync(x => x.Id == id);
+                });
+
+                    
                 if (category is null)
                 {
                     return NotFound("Categoria não encontrada...");
@@ -136,7 +175,14 @@ namespace EcommerceApi.Controllers
                 await context.Categories.AddAsync(category);
                 await context.SaveChangesAsync();
 
-                return Created($"api/categories/{category.Id}", category);
+                var categoryViewModel = new CategoryListViewModel
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    Description = category.Description
+                };
+
+                return Created($"api/categories/{category.Id}", categoryViewModel);
             }
             catch
             {
@@ -191,8 +237,10 @@ namespace EcommerceApi.Controllers
                 {
                     return NotFound("Categoria não encontrada...");
                 }
+
                 context.Categories.Remove(category);
                 await context.SaveChangesAsync();
+
                 return Ok("Categoria removida com sucesso...");
             }
             catch (Exception)
