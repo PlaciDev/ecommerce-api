@@ -105,7 +105,34 @@ namespace EcommerceApi.Controllers
                 context.Customers.Add(customer);
                 context.SaveChanges();
 
-                return Created($"api/customers/{customer.Id}", customer);
+                var customerViewModel = new CustomerListViewModel
+                {
+                    Id = customer.Id,
+                    PhoneNumber = customer.PhoneNumber,
+                    User = new UserListViewModel
+                    {
+                        Id = customer.User.Id,
+                        Name = customer.User.Name,
+                        Email = customer.User.Email,
+                        CreatedAt = customer.User.CreatedAt,
+                        Role = new RoleListViewModel
+                        {
+                            Id = customer.User.Role.Id,
+                            Name = customer.User.Role.Name,
+                            Description = customer.User.Role.Description
+                        }
+                    },
+                    Addresses = customer.Addresses.Select(x => new AddressListViewModel
+                    {
+                        Id = x.Id,
+                        Street = x.Street,
+                        City = x.City,
+                        State = x.State,
+                        ZipCode = x.ZipCode
+                    }).ToList()
+                };
+
+                return Created($"api/customers/{customer.Id}", customerViewModel);
 
 
 
@@ -119,7 +146,9 @@ namespace EcommerceApi.Controllers
 
         [HttpGet("api/customers")]
         public async Task<IActionResult> Get(
-            [FromServices] ApiDbContext context)
+            [FromServices] ApiDbContext context,
+            [FromQuery] int page,
+            [FromQuery] int pageSize)
         {
             try
             {
@@ -154,7 +183,10 @@ namespace EcommerceApi.Controllers
                             City = x.City,
                             State = x.State,
                             ZipCode = x.ZipCode
-                        }).ToList()
+                        })
+                        .Skip(page * pageSize)
+                        .Take(pageSize)
+                        .ToList()
 
 
                     });
