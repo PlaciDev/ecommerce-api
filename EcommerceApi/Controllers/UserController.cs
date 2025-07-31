@@ -48,6 +48,20 @@ namespace EcommerceApi.Controllers
                 context.Users.Add(user);
                 await context.SaveChangesAsync();
 
+                var UserListViewModel = new UserListViewModel
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    CreatedAt = user.CreatedAt,
+                    Role = new RoleListViewModel
+                    {
+                        Id = user.Role.Id,
+                        Name = user.Role.Name,
+                        Description = user.Role.Description
+                    }
+                };
+
                 return Created($"api/users/{user.Id}", user);
             }
             catch
@@ -107,7 +121,9 @@ namespace EcommerceApi.Controllers
         
         [HttpGet("api/users")]
         public async Task<IActionResult> Get(
-            [FromServices] ApiDbContext context)
+            [FromServices] ApiDbContext context,
+            [FromQuery] int page,
+            [FromQuery] int pageSize)
         {
             try
             {
@@ -128,6 +144,8 @@ namespace EcommerceApi.Controllers
                             Description = x.Role.Description
                         }
                     })
+                    .Skip(page * pageSize)
+                    .Take(pageSize)
                     .ToListAsync();
 
 
