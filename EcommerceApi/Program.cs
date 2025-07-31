@@ -10,7 +10,6 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 // Configura a connectionString para o banco de dados
 
@@ -36,6 +35,10 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Habilita o cache em memória
+
+builder.Services.AddMemoryCache();
+
 
 // Ignora ciclos de referência e valores nulos ao serializar objetos JSON
 
@@ -44,6 +47,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
+
+// Configura o serviço de serialização JSON para usar enumerações como strings
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
