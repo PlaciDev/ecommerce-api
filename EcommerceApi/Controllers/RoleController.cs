@@ -120,6 +120,13 @@ namespace EcommerceApi.Controllers
                 context.Roles.Update(role);
                 await context.SaveChangesAsync();
 
+                var roleViewModel = new RoleListViewModel
+                {
+                    Id = role.Id,
+                    Name = role.Name,
+                    Description = role.Description
+                };
+
                 return Ok(role);
             }
             catch
