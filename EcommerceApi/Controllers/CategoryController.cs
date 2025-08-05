@@ -15,8 +15,8 @@ namespace EcommerceApi.Controllers
         public async Task<IActionResult> Get(
             [FromServices] ApiDbContext context,
             [FromServices] IMemoryCache cache,
-            [FromQuery] int page,
-            [FromQuery] int pageSize)
+            [FromQuery] int page = 0,
+            [FromQuery] int pageSize = 25)
         {
             try
             {
@@ -60,8 +60,8 @@ namespace EcommerceApi.Controllers
         public async Task<IActionResult> GetWithProducts(
             [FromServices] ApiDbContext context,
             [FromServices] IMemoryCache cache,
-            [FromQuery] int size,
-            [FromQuery] int pageSize)
+            [FromQuery] int page = 0,
+            [FromQuery] int pageSize = 25)
         {
             try
             {
@@ -87,7 +87,7 @@ namespace EcommerceApi.Controllers
                            Description = x.Description
                        }).ToList()
                    })
-                   .Skip(size * pageSize)
+                   .Skip(page * pageSize)
                    .Take(pageSize)
                    .OrderBy(x => x.Name)
                    .ToListAsync();
@@ -114,7 +114,7 @@ namespace EcommerceApi.Controllers
         {
             try
             {
-                var category = cache.GetOrCreateAsync<CategoryListViewModel>($"category_{id}", async entry =>
+                var category = await cache.GetOrCreateAsync<CategoryListViewModel>($"category_{id}", async entry =>
 
                 {
                     entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
@@ -216,7 +216,14 @@ namespace EcommerceApi.Controllers
                 context.Update(category);
                 await context.SaveChangesAsync();
 
-                return Ok(category);
+                var categoryViewModel = new CategoryListViewModel
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    Description = category.Description
+                };
+
+                return Ok(categoryViewModel);
             }
             catch (Exception)
             {
