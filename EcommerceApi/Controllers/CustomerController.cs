@@ -147,8 +147,8 @@ namespace EcommerceApi.Controllers
         [HttpGet("api/customers")]
         public async Task<IActionResult> Get(
             [FromServices] ApiDbContext context,
-            [FromQuery] int page,
-            [FromQuery] int pageSize)
+            [FromQuery] int page = 0,
+            [FromQuery] int pageSize = 25)
         {
             try
             {
@@ -350,48 +350,6 @@ namespace EcommerceApi.Controllers
             {
                 return StatusCode(500, "Erro interno no servidor...");
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         }
     }
