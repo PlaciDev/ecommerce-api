@@ -14,8 +14,8 @@ namespace EcommerceApi.Controllers
         [HttpGet("api/orders")]
         public async Task<IActionResult> Get(
             [FromServices] ApiDbContext context,
-            [FromQuery] int page,
-            [FromQuery] int pageSize)
+            [FromQuery] int page = 0,
+            [FromQuery] int pageSize = 25)
         {
             try
             {
