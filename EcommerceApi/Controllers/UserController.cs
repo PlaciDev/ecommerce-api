@@ -122,8 +122,8 @@ namespace EcommerceApi.Controllers
         [HttpGet("api/users")]
         public async Task<IActionResult> Get(
             [FromServices] ApiDbContext context,
-            [FromQuery] int page,
-            [FromQuery] int pageSize)
+            [FromQuery] int page = 0,
+            [FromQuery] int pageSize = 25)
         {
             try
             {
@@ -221,7 +221,21 @@ namespace EcommerceApi.Controllers
                 context.Users.Add(user);
                 await context.SaveChangesAsync();
 
-                return Created($"api/users/{user.Id}", user);
+                var userViewModel = new UserListViewModel
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    CreatedAt = user.CreatedAt,
+                    Role = new RoleListViewModel
+                    {
+                        Id = user.Role.Id,
+                        Name = user.Role.Name,
+                        Description = user.Role.Description
+                    }
+                };
+
+                return Created($"api/users/{user.Id}", userViewModel);
             }
             catch
             {
@@ -260,7 +274,22 @@ namespace EcommerceApi.Controllers
                 context.Users.Update(user);
 
                 await context.SaveChangesAsync();
-                return Ok(user);
+
+                var userViewModel = new UserListViewModel
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    CreatedAt = user.CreatedAt,
+                    Role = new RoleListViewModel
+                    {
+                        Id = user.Role.Id,
+                        Name = user.Role.Name,
+                        Description = user.Role.Description
+                    }
+                };
+
+                return Ok(userViewModel);
             }
             catch
             {
