@@ -14,8 +14,8 @@ namespace EcommerceApi.Controllers
         public async Task<IActionResult> Get(
             [FromServices] ApiDbContext context,
             [FromServices] IMemoryCache cache,
-            [FromQuery] int page,
-            [FromQuery] int pageSize)
+            [FromQuery] int page = 0,
+            [FromQuery] int pageSize = 25)
         {
             try
             {
@@ -206,7 +206,22 @@ namespace EcommerceApi.Controllers
                 context.Products.Update(product);
                 await context.SaveChangesAsync();
 
-                return Ok(product);
+                var productViewModel = new ProductListViewModel
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Description = product.Description,
+                    Price = product.Price,
+                    Stock = product.Stock,
+                    Category = new CategoryListViewModel
+                    {
+                        Id = category.Id,
+                        Name = category.Name,
+                        Description = category.Description
+                    }
+                };
+
+                return Ok(productViewModel);
 
 
             }
