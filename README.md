@@ -1,4 +1,4 @@
-# 🛒 EcommerceApi
+# EcommerceApi
 
 API RESTful para gerenciamento de um sistema de e-commerce. Oferece funcionalidades para administração de usuários, produtos, categorias, clientes, pedidos, pagamentos e autenticação.
 
